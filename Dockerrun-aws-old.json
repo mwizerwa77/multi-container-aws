@@ -1,0 +1,37 @@
+{
+    "AWSEBDockerrunVersion":2,
+    "containerDefinition":[
+        {
+            "name":"client",
+            "image":"mwizerwa77/client",
+            "hostname":"client",
+            "essential":false
+        },
+        {
+            "name":"server",
+            "image":"mwizerwa77/server",
+            "hostname":"api",
+            "essential":false 
+        },
+        {
+            "name":"worker",
+            "image":"mwizerwa77/worker",
+            "hostname":"worker",
+            "essential":false 
+        },
+        {
+            "name":"nginx",
+            "image":"mwizerwa77/nginx",
+            "essential":true,
+            "portMappings":[
+                {
+                    "hostPort":80,
+                    "containerPort":80
+                }
+            ],
+            "links":[
+                "client","server"
+            ]
+        }
+    ]
+}

@@ -16,14 +16,18 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
+# login to docker hub
     - name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+# Set up docker buildx        
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
+# Client component build and push it to docker hub
     - name: Client Build and push
       uses: docker/build-push-action@v2
       with:
@@ -34,6 +38,8 @@ jobs:
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/client:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/client:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/client:buildcache,mode=max
+
+# nginx component build and push it to docker hub
     - name: nginx Build and push
       uses: docker/build-push-action@v2
       with:
@@ -45,6 +51,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/nginx:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/nginx:buildcache,mode=max
 
+# |Server component build and push it to docker hub
     - name: server Build and push
       uses: docker/build-push-action@v2
       with:
@@ -55,7 +62,8 @@ jobs:
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/server:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/server:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/server:buildcache,mode=max
-    
+
+# Worker component build and push it to docker hub    
     - name: worker Build and push
       uses: docker/build-push-action@v2
       with:
@@ -66,4 +74,31 @@ jobs:
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/worker:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/worker:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/worker:buildcache,mode=max
+    
+    - name: Generate Deployment Package
+      run: zip -r deploy.zip *
+
+    - name: Get timestamp
+      uses: gerred/actions/current-time@master
+      id: current-time
+        
+    - name: Run string replace
+      uses: frabert/replace-string-action@master
+      id: format-time
+      with:
+        pattern: '[:\.]+'
+        string: "${{ steps.current-time.outputs.time }}"
+        replace-with: '-'
+        flags: 'g'
+
+    - name: Deploy to EB
+      uses: einaregilsson/beanstalk-deploy@v14
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        application_name: multi-container-demo
+        environment_name: Multicontainerdemo-env
+        version_label: "multi-container-demo-${{ steps.format-time.outputs.replaced }}"
+        region: us-east-1
+        deployment_package: deploy.zip
           
