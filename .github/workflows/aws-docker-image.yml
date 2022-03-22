@@ -22,3 +22,9 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+    # List images
+    - name: List images
+      run: docker images
+    # Push images
+    - name: Push images
+      run: docker-compose push --ignore-push-failures
