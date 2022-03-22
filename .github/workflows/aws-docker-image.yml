@@ -38,7 +38,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
           context: ./nginx
-          file: ./Dockerfile
+          file: ./nginx/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/nginx:latest
@@ -49,7 +49,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
           context: ./server
-          file: ./Dockerfile
+          file: ./server/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/server:latest
@@ -60,7 +60,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
           context: ./worker
-          file: ./Dockerfile
+          file: ./worker/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/worker:latest
