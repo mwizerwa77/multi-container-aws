@@ -27,4 +27,4 @@ jobs:
       run: docker images
     # Push images
     - name: Push images
-      run: docker-compose push postgres,redis,nginx,api,client,worker  --ignore-push-failures
+      run: docker-compose push postgres  --ignore-push-failures
